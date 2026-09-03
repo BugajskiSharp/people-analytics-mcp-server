@@ -49,8 +49,17 @@ def get_headcount() -> int:
     )
 
 @mcp.tool()
-def get_headcount_by_division(division: str) -> dict:
-    """Return active headcount for a valid division."""
+def get_headcount_by_division(user_role: str, division: str) -> dict:
+    """Return active headcount for a valid division if the user is authorized."""
+
+    authorized_roles = ["Manager", "HR Analyst"]
+
+    if user_role not in authorized_roles:
+        return {
+            "success": False,
+            "authorized": False,
+            "message": "You are not authorized to access division headcount."
+        }
 
     valid_divisions = {
         employee["division"]
@@ -69,6 +78,7 @@ def get_headcount_by_division(division: str) -> dict:
     if matched_division is None:
         return {
             "success": False,
+            "authorized": True,
             "message": "Division not found.",
             "available_divisions": sorted(valid_divisions)
         }
@@ -81,6 +91,8 @@ def get_headcount_by_division(division: str) -> dict:
 
     return {
         "success": True,
+        "authorized": True,
+        "role": user_role,
         "division": matched_division,
         "active_headcount": count
     }
